@@ -1,0 +1,9 @@
+numpy>=1.13
+pillow
+
+[geotiff]
+rasterio
+
+[xarray]
+xarray
+dask[array]

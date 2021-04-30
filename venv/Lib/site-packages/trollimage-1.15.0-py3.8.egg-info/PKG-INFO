@@ -1,0 +1,41 @@
+Metadata-Version: 2.1
+Name: trollimage
+Version: 1.15.0
+Summary: Pytroll imaging library
+Home-page: https://github.com/pytroll/trollimage
+Author: Martin Raspaud
+Author-email: martin.raspaud@smhi.se
+License: UNKNOWN
+Description: Trollimage
+        ==========
+        
+        .. image:: https://img.shields.io/pypi/v/trollimage.svg
+            :target: https://pypi.python.org/pypi/trollimage/
+            :alt: Version
+        
+        .. image:: https://anaconda.org/conda-forge/trollimage/badges/version.svg
+           :target: https://anaconda.org/conda-forge/trollimage/
+           :alt: Conda-forge
+        
+        .. image:: https://github.com/pytroll/trollimage/workflows/CI/badge.svg?branch=master
+            :target: https://github.com/pytroll/trollimage/actions?query=workflow%3A%22CI%22
+            :alt: GitHub Actions
+        
+        .. image:: https://coveralls.io/repos/pytroll/trollimage/badge.png?branch=master
+            :target: https://coveralls.io/r/pytroll/trollimage?branch=master
+            :alt: Coverage
+        
+        Imaging package for pytroll packages like
+        `SatPy <https://github.com/pytroll/satpy>`_.
+        
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Scientific/Engineering
+Requires-Python: >=3.6
+Provides-Extra: geotiff
+Provides-Extra: xarray

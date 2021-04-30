@@ -1,0 +1,25 @@
+Metadata-Version: 1.1
+Name: trollsift
+Version: 0.3.5
+Summary: String parser/formatter
+Home-page: https://github.com/pytroll/trollsift
+Author: Panu Lahtinen
+Author-email: panu.lahtinen@fmi.fi
+License: UNKNOWN
+Download-URL: https://github.com/pytroll/trollsift/tarball/v0.3.5
+Description: Trollsift
+        =========
+        
+        Trollsift is a collection of modules that assist with formatting,
+        parsing and filtering satellite granule file names.
+        
+        For documentation, see http://trollsift.readthedocs.org/
+        
+Keywords: string parsing,string formatting,pytroll
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Scientific/Engineering
