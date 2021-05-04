@@ -39,6 +39,7 @@ def resample(scn, dataset, area_def, swath_def):
                                                 fill_value=False)
 
     print("Resampled")
+    plt.figure(figsize=(15, 15))
     plt.imshow(resample_plot)
     plt.show()
 
@@ -57,6 +58,7 @@ def sample_cloud_cover(scn, dataset, area_def, swath_def):
                                             fill_value=False)
 
     print("Plotted filter")
+    plt.figure(figsize=(15, 15))
     plt.imshow(resampled)
     plt.show()
 
@@ -139,6 +141,7 @@ def location_irradiance(scn, dataset, area, swath):
                                                        fill_value=False)
 
     print("Irradiance")
+    plt.figure(figsize=(15, 15))
     plt.imshow(irradiance_clear_map)
     plt.show()
 
@@ -154,7 +157,10 @@ def location_irradiance(scn, dataset, area, swath):
                                                  fill_value=False)
 
     print("Irradiance")
+    plt.figure(figsize=(15, 15))
     plt.imshow(irradiance_map)
+    plt.colorbar(label='$Irradiance W/m^2$')
+    plt.clim(np.min(irradiance_map), np.max(irradiance_map))
     plt.show()
 
 
@@ -166,7 +172,7 @@ if __name__ == '__main__':
     read_seviri_data(file2, reader, "radiance", "HRV")
     area = create_europe_area()
     swath = calculate_swath(scene, "HRV")
-    # resample(scene, "HRV", area, swath)
-    # sample_cloud_cover(scene, "HRV", area, swath)
-    # sample_albedo(scene, "HRV", area, swath)
+    resample(scene, "HRV", area, swath)
+    sample_cloud_cover(scene, "HRV", area, swath)
+    sample_albedo(scene, "HRV", area, swath)
     location_irradiance(scene, "HRV", area, swath)
