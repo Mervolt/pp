@@ -1,6 +1,8 @@
+import math
 import os
 from statistics import mean
 
+import time
 import numpy as np
 import pyresample as pr
 import satpy
@@ -44,9 +46,8 @@ def resample(scn, dataset, area_def, swath_def):
 def sample_cloud_cover(scn, dataset, area_def, swath_def):
     values = scn[dataset].values
     values = values.astype("float32")
-    # cloud_cover_filter = values > 20
     zeros = np.zeros(values.shape)
-    cloud_cover = np.where(values > 20, values, zeros)  # values[np.where(values > 20)]
+    cloud_cover = np.where(values > 15, values, zeros)  # values[np.where(values > 20)]
 
     resampled = pr.kd_tree.resample_nearest(swath_def,
                                             cloud_cover,
@@ -63,7 +64,9 @@ def sample_cloud_cover(scn, dataset, area_def, swath_def):
 def sample_albedo(scn, dataset, area_def, swath_def):
     values = scn[dataset].values
     values = values.astype("float32")
-    albedo = values[np.where(values > 2 and values < 20)]
+    zeros = np.zeros(values.shape)
+    filter = np.logical_and(values > 14, values < 16)
+    albedo = np.where(filter, values, zeros)
 
     albedoed = pr.kd_tree.resample_nearest(swath_def,
                                            albedo,
@@ -105,23 +108,65 @@ def create_europe_area():
     return area_def
 
 
-def location_irradiance():
-    pol = Location(50, 10, 'Etc/GMT-1', 34, 'Berlin')
-    times = pandas.date_range(start='2020-04-09', end='2020-04-10', freq='15min')
-    cs = pol.get_clearsky(times)
-    cs.resample()
-    plt.ylabel('Irradiance $W/m^2$')
-    plt.title('Ineichen, climatological turbidity')
+def location_irradiance(scn, dataset, area, swath):
+    values = scn[dataset].values
+    values = values.astype("float32")
+    lats_max = int(values.shape[0] / 20)
+    lons_max = int(values.shape[1] / 20)
+    irradiance_clear = np.zeros((values.shape[0], values.shape[1]))
+    irradiance = np.zeros((values.shape[0], values.shape[1]))
+    lons, lats = scn[dataset].area.get_lonlats()
+
+    times = pandas.date_range(start='2020-04-09 09:00:00', end='2020-04-09 09:00:00', freq='15min')
+
+    for y in range(lats_max):
+        for x in range(lons_max):
+            true_x = x * 20
+            true_y = y * 20
+            if lats[true_y][true_x] != math.inf and lons[true_y][true_x] != math.inf:
+                result = Location(lats[true_y][true_x], lons[true_y][true_x]).get_clearsky(times).ghi.values
+            else:
+                result = 0
+            for i in range(20):
+                for j in range(20):
+                    irradiance_clear[true_y + i][true_x + j] = result
+
+    irradiance_clear_map = pr.kd_tree.resample_nearest(swath,
+                                                       irradiance_clear,
+                                                       area,
+                                                       radius_of_influence=16000,  # in meters
+                                                       epsilon=0.5,
+                                                       fill_value=False)
+
+    print("Irradiance")
+    plt.imshow(irradiance_clear_map)
     plt.show()
-    # Global Horizontal (GHI) = Direct Normal (DNI) X cos(θ) + Diffuse Horizontal (DHI)
+
+    for y in range(values.shape[0]):
+        for x in range(values.shape[1]):
+            irradiance[y][x] = irradiance_clear[y][x] * (100 - values[y][x]) / 100
+
+    irradiance_map = pr.kd_tree.resample_nearest(swath,
+                                                 irradiance,
+                                                 area,
+                                                 radius_of_influence=16000,  # in meters
+                                                 epsilon=0.5,
+                                                 fill_value=False)
+
+    print("Irradiance")
+    plt.imshow(irradiance_map)
+    plt.show()
 
 
 if __name__ == '__main__':
     file2 = './data/new/MSG4-SEVI-MSG15-0100-NA-20210411085743.374000000Z-20210411085800-1499616.nat'
     reader = "seviri_l1b_native"
     scene = Scene(filenames={"seviri_l1b_native": [file2]})
+    print(scene.end_time)
     read_seviri_data(file2, reader, "radiance", "HRV")
     area = create_europe_area()
-    resample(scene, "HRV", area, calculate_swath(scene, "HRV"))
-    sample_cloud_cover(scene, "HRV", area, calculate_swath(scene, "HRV"))
-    sample_albedo(scene, "HRV", area, calculate_swath(scene, "HRV"))
+    swath = calculate_swath(scene, "HRV")
+    # resample(scene, "HRV", area, swath)
+    # sample_cloud_cover(scene, "HRV", area, swath)
+    # sample_albedo(scene, "HRV", area, swath)
+    location_irradiance(scene, "HRV", area, swath)
