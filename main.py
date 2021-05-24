@@ -21,6 +21,8 @@ import pytz
 import pyorbital
 import tables
 
+from utils import first_minimum
+
 
 def load_seviri_data(file, reader, calibration="radiance", dataset="HRV"):
     scn = Scene(filenames={reader: [file]}, reader_kwargs={'calib_mode': 'GSICS'})
@@ -188,6 +190,32 @@ def download_seviri_images(folder_path="./data/new/", dataset="HRV"):
     return list(data_files_filter)
 
 
+def threaded_albedo_calculation(
+        prepared_data,
+        dataset_size,
+        x_range,
+        cleansing_range = 25,
+        folder_path="./data/new/",
+        reader="seviri_l1b_native",
+        dataset="HRV",
+        calibration="radiance"):
+    for i in range(dataset_size):
+        result_dict = None
+        scene = load_seviri_data(folder_path + prepared_data[i], reader, calibration)
+        values = scene[dataset].values
+        values = values.astype("float32")
+
+        albedo_values = np.empty(shape=values.shape, dtype=object)
+        for x in range(albedo_values.shape[0]):
+            for y in range(albedo_values.shape[1]):
+                albedo_values[x][y] = []
+
+        for x in range(albedo_values.shape[0]):
+            for y in range(albedo_values.shape[1]):
+                albedo_values[albedo_values.shape[0] - x - 1][albedo_values.shape[1] - y - 1].append(values[x][y])
+
+
+
 def albedo_calculation(folder_path="./data/new/", reader="seviri_l1b_native", dataset="HRV", calibration="radiance"):
     prepared_data = download_seviri_images()
     scene = load_seviri_data(folder_path + prepared_data[0], reader, "radiance")
@@ -195,18 +223,32 @@ def albedo_calculation(folder_path="./data/new/", reader="seviri_l1b_native", da
     values = values.astype("float32")
 
     albedo_values = np.empty(shape=values.shape, dtype=object)
-
+    albedo_calc = np.empty(shape=values.shape, dtype="float32")
     for x in range(albedo_values.shape[0]):
         for y in range(albedo_values.shape[1]):
             albedo_values[x][y] = []
 
-    for file in prepared_data:
-        scene = load_seviri_data(folder_path + file, reader, calibration)
+
+    for i in range(10):
+        start = time.time()
+        print(i)
+        scene = load_seviri_data(folder_path + prepared_data[i], reader, calibration)
         values = scene[dataset].values
         values = values.astype("float32")
         for x in range(albedo_values.shape[0]):
             for y in range(albedo_values.shape[1]):
-                albedo_values[x][y].append(values[x][y])
+                albedo_values[albedo_values.shape[0] - x - 1][albedo_values.shape[1] - y - 1].append(values[x][y])
+        end = time.time()
+        print(end - start)
+
+    for x in range(albedo_values.shape[0]):
+        for y in range(albedo_values.shape[1]):
+            albedo_calc[x][y] = first_minimum(albedo_values[x][y])
+
+    print(albedo_calc.shape)
+    plt.imshow(albedo_calc)
+    plt.show()
+
 
 
 if __name__ == '__main__':
