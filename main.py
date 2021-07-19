@@ -1,4 +1,5 @@
 import math
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -49,7 +50,6 @@ def sample_cloud_cover(scn, dataset, area_def, swath_def):
                                             epsilon=0.5,
                                             fill_value=False)
 
-    print("Plotted filter")
     plt.figure(figsize=(15, 15))
     plt.imshow(resampled)
     plt.show()
@@ -145,14 +145,7 @@ def calculate_irradiance_for(file, reader="seviri_l1b_native"):
 
 
 if __name__ == '__main__':
-    file1 = './data/new/MSG4-SEVI-MSG15-0100-NA-20210411085743.374000000Z-20210411085800-1499616.nat'
-    file2 = './data/new/MSG4-SEVI-MSG15-0100-NA-20210415065743.958000000Z-20210415065800-1499616.nat'
-    file3 = './data/ncef/MSG4-SEVI-MSG15-0100-NA-20200813235743.374000000Z-NA.nat'
-    file4 = './data/ncef/MSG4-SEVI-MSG15-0100-NA-20200829172743.426000000Z-NA.nat'
-    #print_seviri_data(file1, "seviri_l1b_native", "radiance")
-    #print_seviri_data(file4, "seviri_l1b_native", "radiance")
-    start = time.time()
-    calculate_irradiance_for(file1)
-    end = time.time()
-    print(end - start)
-    calculate_irradiance_for(file2)
+    if(len(sys.argv) != 2):
+        print("Jako argument należy podać ścieżkę do pliku!")
+        sys.exit(-1)
+    calculate_irradiance_for(sys.argv[1])

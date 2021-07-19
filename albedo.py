@@ -5,11 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from satpy import Scene
 
-from utils import first_max_better_int
-
 
 def numpy_albedo(folder_path="./data/new/", reader="seviri_l1b_native", dataset="HRV", calibration="radiance"):
-    start = time.time()
     prepared_data = download_seviri_images()
     all_values = []
     for data in prepared_data:
@@ -17,17 +14,9 @@ def numpy_albedo(folder_path="./data/new/", reader="seviri_l1b_native", dataset=
         values = scene[dataset].values
         values = values.astype("int")
         all_values.append(values)
-    end = time.time()
-    print(end - start)
-    start = time.time()
     stacked = np.stack(all_values)
     stacked[stacked < 0] = 0
-    end = time.time()
-    print(end - start)
-    start = time.time()
     result = np.apply_along_axis(first_max_better_int, 0, stacked)
-    end = time.time()
-    print(end - start)
     plt.imshow(np.flip(result))
     plt.show()
 
