@@ -7,7 +7,6 @@ import pandas
 import pyresample as pr
 from pvlib.location import Location
 from satpy import Scene
-import time
 
 
 def load_seviri_data(file, reader, calibration="radiance", dataset="HRV"):
@@ -65,7 +64,7 @@ def calculate_swath(scn, dataset):
 
 def create_europe_area():
     area_id = 'ease_sh'
-    description = 'Antarctic EASE grid'
+    description = 'Europe EASE grid'
     proj_id = 'ease_sh'
     projection = {'proj': 'longlat', "ellps": "WGS84", "datum": "WGS84"}
 
@@ -92,7 +91,11 @@ def location_irradiance(scn, dataset, area, swath):
     irradiance = np.zeros((values.shape[0], values.shape[1]))
     lons, lats = scn[dataset].area.get_lonlats()
 
-    times = pandas.date_range(start='2020-04-09 09:00:00', end='2020-04-09 09:00:00', freq='15min')
+    times = pandas.date_range(
+        start=scn.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+        end=scn.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+        freq='15min'
+    )
 
     for y in range(lats_max):
         for x in range(lons_max):
@@ -145,7 +148,7 @@ def calculate_irradiance_for(file, reader="seviri_l1b_native"):
 
 
 if __name__ == '__main__':
-    if(len(sys.argv) != 2):
+    if (len(sys.argv) != 2):
         print("Jako argument należy podać ścieżkę do pliku!")
         sys.exit(-1)
     calculate_irradiance_for(sys.argv[1])

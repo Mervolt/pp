@@ -1,5 +1,5 @@
 import os
-import time
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,7 +7,7 @@ from satpy import Scene
 
 
 def numpy_albedo(folder_path="./data/new/", reader="seviri_l1b_native", dataset="HRV", calibration="radiance"):
-    prepared_data = download_seviri_images()
+    prepared_data = download_seviri_images(folder_path)
     all_values = []
     for data in prepared_data:
         scene = load_seviri_data(folder_path + data, reader, calibration)
@@ -45,4 +45,7 @@ def first_max_better_int(np_array):
 
 
 if __name__ == '__main__':
-    numpy_albedo()
+    if len(sys.argv) != 2:
+        numpy_albedo()
+    else:
+        numpy_albedo(folder_path=sys.argv[1])
